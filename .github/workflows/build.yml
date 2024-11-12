@@ -68,7 +68,7 @@ jobs:
         $exe = Get-ChildItem -Recurse -Filter "Unsafengine64CUI.exe"
         if ($exe) {
             Write-Host "EXE found at: $($exe.FullName)"
-            Copy-Item $exe.FullName -Destination "C:\pintool\" -Force
+            Copy-Item $exe.FullName -Destination "C:\pintool\UnSafengine64.exe" -Force
         } else {
             Write-Error "EXE not found"
         }
@@ -86,7 +86,7 @@ jobs:
     - name: Unpack Test File
       run: |
         cd C:\pintool
-        .\UnSafengine64.exe -deob .\Skin_Injector.exe
+        .\Unsafengine64CUI.exe -deob .\Skin_Injector.exe
       shell: powershell
       
     - name: Upload unpacked file
