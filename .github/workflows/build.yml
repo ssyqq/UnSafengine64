@@ -18,9 +18,7 @@ jobs:
       
     - name: Extract Intel Pin
       run: |
-        # 直接从项目目录解压Pin
         Expand-Archive -Path pin.zip -DestinationPath C:\
-        # 重命名目录
         Get-ChildItem C:\ -Directory -Filter "pin-*" | Rename-Item -NewName "pin"
       shell: powershell
       
@@ -28,23 +26,49 @@ jobs:
       run: mkdir C:\pintool
       
     - name: Build DLL
-      run: msbuild /p:Configuration=Release /p:Platform=x64 Unsafengine64.vcxproj
+      run: |
+        msbuild /p:Configuration=Release /p:Platform=x64 Unsafengine64.vcxproj
+        Get-ChildItem -Recurse | Where-Object {$_.Name -like "UnSafengine64.dll"}
+      shell: powershell
       
     - name: Build CUI
-      run: msbuild /p:Configuration=Release /p:Platform=x64 Unsafengine64CUI.vcxproj
+      run: |
+        msbuild /p:Configuration=Release /p:Platform=x64 Unsafengine64CUI.vcxproj
+        Get-ChildItem -Recurse | Where-Object {$_.Name -like "UnSafengine64.exe"}
+      shell: powershell
+        
+    - name: List Files
+      run: |
+        Write-Host "Current Directory:"
+        Get-Location
+        Write-Host "Files in current directory:"
+        Get-ChildItem -Recurse
+        Write-Host "Files in x64/Release:"
+        Get-ChildItem "x64\Release" -ErrorAction SilentlyContinue
+      shell: powershell
         
     - name: Copy Files to pintool directory
       run: |
-        Copy-Item "x64\Release\UnSafengine64.dll" -Destination "C:\pintool\"
-        Copy-Item "x64\Release\UnSafengine64.exe" -Destination "C:\pintool\"
-        Copy-Item "UnSafengine64.cfg" -Destination "C:\pintool\"
+        $dll = Get-ChildItem -Recurse -Filter "UnSafengine64.dll" | Select-Object -First 1
+        $exe = Get-ChildItem -Recurse -Filter "UnSafengine64.exe" | Select-Object -First 1
+        
+        if ($dll) {
+          Copy-Item $dll.FullName -Destination "C:\pintool\"
+        } else {
+          Write-Error "DLL not found"
+        }
+        
+        if ($exe) {
+          Copy-Item $exe.FullName -Destination "C:\pintool\"
+        } else {
+          Write-Error "EXE not found"
+        }
+        
+        Copy-Item "UnSafengine64.cfg" -Destination "C:\pintool\" -ErrorAction SilentlyContinue
       shell: powershell
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: UnSafengine64-build
-        path: |
-          C:\pintool\UnSafengine64.dll
-          C:\pintool\UnSafengine64.exe
-          C:\pintool\UnSafengine64.cfg
+        path: C:\pintool\*
