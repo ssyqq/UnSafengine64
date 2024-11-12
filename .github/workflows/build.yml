@@ -78,7 +78,24 @@ jobs:
         Get-ChildItem "C:\pintool"
         
         Copy-Item "UnSafengine64.cfg" -Destination "C:\pintool\" -ErrorAction SilentlyContinue
+        
+        # 复制需要解包的文件到 pintool 目录
+        Copy-Item "Skin_Injector.exe" -Destination "C:\pintool\" -Force
       shell: powershell
+        
+    - name: Unpack Test File
+      run: |
+        cd C:\pintool
+        .\UnSafengine64.exe -deob .\Skin_Injector.exe
+      shell: powershell
+      
+    - name: Upload unpacked file
+      uses: actions/upload-artifact@v4
+      with:
+        name: unpacked-files
+        path: |
+          C:\pintool\*_unpacked.exe
+          C:\pintool\Skin_Injector_unpacked.exe
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
