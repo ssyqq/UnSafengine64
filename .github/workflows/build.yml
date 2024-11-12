@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-2019
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
@@ -27,14 +27,18 @@ jobs:
     - name: Create pintool directory
       run: mkdir C:\pintool
       
-    - name: Build Solution
-      run: |
-        msbuild /p:Configuration=Release /p:Platform=x64 UnSafengine64.sln
+    - name: Build DLL
+      run: msbuild /p:Configuration=Release /p:Platform=x64 Unsafengine64.vcxproj
+      
+    - name: Build CUI
+      run: msbuild /p:Configuration=Release /p:Platform=x64 Unsafengine64CUI.vcxproj
         
     - name: Copy Files to pintool directory
       run: |
-        copy x64\Release\UnSafengine64.dll C:\pintool\
-        copy x64\Release\UnSafengine64CUI.exe C:\pintool\
+        Copy-Item "x64\Release\UnSafengine64.dll" -Destination "C:\pintool\"
+        Copy-Item "x64\Release\UnSafengine64.exe" -Destination "C:\pintool\"
+        Copy-Item "UnSafengine64.cfg" -Destination "C:\pintool\"
+      shell: powershell
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -42,4 +46,5 @@ jobs:
         name: UnSafengine64-build
         path: |
           C:\pintool\UnSafengine64.dll
-          C:\pintool\UnSafengine64CUI.exe 
+          C:\pintool\UnSafengine64.exe
+          C:\pintool\UnSafengine64.cfg
