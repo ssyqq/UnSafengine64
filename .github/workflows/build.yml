@@ -105,3 +105,9 @@ jobs:
       with:
         name: UnSafengine64-build
         path: C:\pintool\*
+        
+    - name: Trace Execution
+      run: |
+        cd C:\pintool
+        .\UnSafengine64.exe -trace -log trace.log .\Skin_Injector.exe
+      shell: powershell
