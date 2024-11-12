@@ -95,7 +95,10 @@ jobs:
         name: unpacked-files
         path: |
           C:\pintool\*_unpacked.exe
+          C:\pintool\*_dmp.exe
+          C:\pintool\*.log
           C:\pintool\Skin_Injector_unpacked.exe
+          C:\pintool\Skin_Injector_dmp.exe
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
