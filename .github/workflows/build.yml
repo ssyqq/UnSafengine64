@@ -1,0 +1,47 @@
+name: Build UnSafengine64
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-2019  # 使用Windows环境,包含VS2019
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+      
+    - name: Download and Extract Intel Pin
+      run: |
+        # 下载Intel Pin 3.18
+        Invoke-WebRequest -Uri "https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.18-98332-gaebd7b1e6-msvc-windows.zip" -OutFile "pin.zip"
+        # 解压到C:\pin
+        Expand-Archive -Path pin.zip -DestinationPath C:\
+        # 重命名目录
+        Get-ChildItem C:\ -Directory -Filter "pin-*" | Rename-Item -NewName "pin"
+      shell: powershell
+      
+    - name: Create pintool directory
+      run: mkdir C:\pintool
+      
+    - name: Build Solution
+      run: |
+        msbuild /p:Configuration=Release /p:Platform=x64 UnSafengine64.sln
+        
+    - name: Copy Files to pintool directory
+      run: |
+        copy x64\Release\UnSafengine64.dll C:\pintool\
+        copy x64\Release\UnSafengine64CUI.exe C:\pintool\
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: UnSafengine64-build
+        path: |
+          C:\pintool\UnSafengine64.dll
+          C:\pintool\UnSafengine64CUI.exe 
