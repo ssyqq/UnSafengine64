@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2019  # 使用Windows环境,包含VS2019
+    runs-on: windows-2019
     
     steps:
     - uses: actions/checkout@v2
@@ -16,11 +16,9 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
       
-    - name: Download and Extract Intel Pin
+    - name: Extract Intel Pin
       run: |
-        # 下载Intel Pin 3.18
-        Invoke-WebRequest -Uri "https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.18-98332-gaebd7b1e6-msvc-windows.zip" -OutFile "pin.zip"
-        # 解压到C:\pin
+        # 直接从项目目录解压Pin
         Expand-Archive -Path pin.zip -DestinationPath C:\
         # 重命名目录
         Get-ChildItem C:\ -Directory -Filter "pin-*" | Rename-Item -NewName "pin"
@@ -39,7 +37,7 @@ jobs:
         copy x64\Release\UnSafengine64CUI.exe C:\pintool\
         
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4  # 更新到 v4 版本
+      uses: actions/upload-artifact@v4
       with:
         name: UnSafengine64-build
         path: |
