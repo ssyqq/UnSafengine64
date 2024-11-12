@@ -49,20 +49,33 @@ jobs:
         
     - name: Copy Files to pintool directory
       run: |
-        $dll = Get-ChildItem -Recurse -Filter "UnSafengine64.dll" | Select-Object -First 1
-        $exe = Get-ChildItem -Recurse -Filter "UnSafengine64.exe" | Select-Object -First 1
-        
-        if ($dll) {
-          Copy-Item $dll.FullName -Destination "C:\pintool\"
+        # 直接检查c:\pintool目录下的DLL
+        if (Test-Path "c:\pintool\UnSafengine64.dll") {
+            Write-Host "DLL found in c:\pintool"
         } else {
-          Write-Error "DLL not found"
+            Write-Host "DLL not found in c:\pintool, searching recursively..."
+            $dll = Get-ChildItem -Recurse -Filter "UnSafengine64.dll"
+            if ($dll) {
+                Write-Host "DLL found at: $($dll.FullName)"
+                Copy-Item $dll.FullName -Destination "C:\pintool\" -Force
+            } else {
+                Write-Error "DLL not found anywhere"
+                exit 1
+            }
         }
         
+        # 同样处理CUI程序
+        $exe = Get-ChildItem -Recurse -Filter "Unsafengine64CUI.exe"
         if ($exe) {
-          Copy-Item $exe.FullName -Destination "C:\pintool\"
+            Write-Host "EXE found at: $($exe.FullName)"
+            Copy-Item $exe.FullName -Destination "C:\pintool\" -Force
         } else {
-          Write-Error "EXE not found"
+            Write-Error "EXE not found"
         }
+        
+        # 列出pintool目录内容
+        Write-Host "Contents of C:\pintool:"
+        Get-ChildItem "C:\pintool"
         
         Copy-Item "UnSafengine64.cfg" -Destination "C:\pintool\" -ErrorAction SilentlyContinue
       shell: powershell
