@@ -86,7 +86,7 @@ jobs:
     - name: Unpack Test File
       run: |
         cd C:\pintool
-        .\Unsafengine64CUI.exe -deob .\Skin_Injector.exe
+        .\UnSafengine64.exe -deob .\Skin_Injector.exe
       shell: powershell
       
     - name: Upload unpacked file
